@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html-->
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" href="css/jquery-ui.css" />
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.mobile-1.4.5.min.js"></script>
+<title>Aplicación Móvil</title>
+<script type="text/javascript">
+$(document).ready(function inicio(){
+
+  var btnGuardar=$("#guardar");
+  btnGuardar.click(function guardar(){
+  var nom=$("#producto").val();
+  var mar=$("#marca").val();
+  var mod=$("#modelo").val();
+  var pre=parseInt($("#precio").val());
+    $.ajax({
+    type:"POST",
+    url:"gardarDatos.php",
+    data:"producto="+nom+"&marca="+mar+"&modelo="+mod+"&precio="+pre,
+    success: registro
+    });
+    
+    function registro(datos){
+    alert(datos);
+    }
+  });
+  
+  var btnConsulta=$("#consulta");//consultar todos los registros
+  btnConsulta.click(function cons(){  
+    $.ajax({
+    type:"POST",
+    url:"consultaBD.php",
+    data:"",
+    success: consultaDatos
+    });
+    
+    function consultaDatos(datos){
+    var respDatos=$.parseJSON(datos);   
+    var respuesta=$("#resconsulta");
+    dibujarTabla(respuesta,respDatos);
+    }
+  });
+  
+  function dibujarTabla(respuesta,respDatos){
+         respuesta.html("");
+    respuesta.append('<table id="tab" border="1">');
+    var tabla=$("#tab");
+    tabla.html("<tr><th>ID</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio</th></tr>");
+    for(var i in respDatos){
+      tabla.append("<tr><td>"+respDatos[i].Id_Producto+"</td>"
+      +"<td>"+respDatos[i].Producto+"</td>"
+      +"<td>"+respDatos[i].Marca+"</td>"
+      +"<td>"+respDatos[i].Modelo+"</td>"
+      +"<td>"+respDatos[i].Precio+"</td></tr>");
+    }
+    tabla.append("</table>");
+  }
+  
+  var consultar2=$("#btnconsultar2");
+  consultar2.click(function cons2(){
+  var valConsulta=$("#valConsulta").val();
+    $.ajax({
+      type:"POST",
+      url:"consultaBD2.php",
+      data:"Id="+valConsulta,
+      success: consultaArticulo
+    });
+    
+    function consultaArticulo(datos){
+    var respDatos2=$.parseJSON(datos);   
+    var respuesta2=$("#resconsulta2");
+    dibujarTabla(respuesta2,respDatos2);
+    }
+  });
+  
+  var btnConsAct=$("#btnConsAct");
+  btnConsAct.click(function cargarDat(){
+    $.ajax({
+    type:"POST",
+    url:"consultaBD.php",
+    data:"",
+    success: cargarDatos
+    });
+    
+    function cargarDatos(datos){
+        var respCarga=$.parseJSON(datos);
+        var respConAct=$("#respConAct");
+        dibujarTabla(respConAct,respCarga);
+    }
+  });
+  var btnCarDatos=$("#btnCarDatos");
+  btnCarDatos.click(function cargarInf(){
+  var Id=parseInt($("#nomActualizar").val());
+  $.ajax({
+      type:"POST",
+      url:"consultaBD2.php",
+      data:"Id="+Id,
+      success:cargarDatosAct
+  });
+  function cargarDatosAct(datos){
+      var consDatAct=$.parseJSON(datos);
+      var respCargDatos=$("#respCargDatos");
+      respCargDatos.html("<label>Id_Producto</label><input type='text' id='Id' disabled='yes'>");
+      respCargDatos.append("<label>Producto</label><input type='text' id='nom'>");
+      respCargDatos.append("<label>Marca</label><input type='text' id='mar'>");
+      respCargDatos.append("<label>Modelo</label><input type='text' id='mod'>");
+      respCargDatos.append("<label>Precio</label><input type='text' id='pre'>");
+      var Id=$("#Id");
+      var nom=$("#nom");
+      var mar=$("#mar");
+      var mod=$("#mod");
+      var pre=$("#pre");
+      for(var i in consDatAct){
+          Id.val(consDatAct[i].Id_Producto);
+          nom.val(consDatAct[i].Producto);
+          mar.val(consDatAct[i].Marca);
+          mod.val(consDatAct[i].Modelo);
+          pre.val(consDatAct[i].Precio);
+          
+         }
+  }
+  });
+  
+  var btnGuarDatos=$("#btnGuarDatos");
+  btnGuarDatos.click(function actual(){
+     var Id=parseInt($("#Id").val());
+     var producto=$("#nom").val();
+     var marca=$("#mar").val();
+     var modelo=$("#mod").val();
+     var precio=$("#pre").val();
+     if(producto=="" || marca==""|| modelo=="" || precio=="" ){
+         alert ("Ingresa informacion en todos los campos");
+     }
+     else{
+         $.ajax({
+             type:"POST",
+             url:"actualizar.php",
+             data:"id="+Id+"&producto="+producto+"&marca="+marca+"&modelo="+modelo+"&precio="+precio,
+             success:actualizacion
+         });
+         function actualizacion(datos){
+             alert(datos);
+         }
+     }
+  });
+   
+  var btnConsEliminar=$("#btnConsEliminar");
+  btnConsEliminar.click(function conEliminar(){
+      $.ajax({
+        type:"POST",
+        url:"consultaBD.php",
+        data:"",
+        success:consultaAntEliminar
+      });
+      function consultaAntEliminar(datos){
+          var datAntEliminar=$.parseJSON(datos);
+          var respConElim=$("#respConElim");
+        dibujarTabla(respConElim,datAntEliminar);
+      }
+  });
+  var btnEliminar=$("#btnEliminar");
+  btnEliminar.click(function eliminarDato(){
+    var   idEliminar=parseInt($("#idEliminar").val());
+    $.ajax({
+        type:"POST",
+        url:"eliminar.php",
+        data:"Id="+idEliminar,
+        success:Eliminacion
+    });
+    function Eliminacion(datos){
+        alert(datos);
+    }
+  });
+});
+</script>
+<style type="text/css">
+p{
+text-align:center;
+}
+</style>
+</head>
+<body>
+<div data-role="page" id="principal">
+  <div data-role="header" >
+    <p>PAPELERIA "El milagrito"</p>
+  </div>
+    
+  <div data-role="content">
+    <div>
+      <ul data-role="listview">
+	<li><a href="#registro" >Registrar Producto</a></li>
+	<li><a href="#consulta" >Consultar Producto</a></li>
+	<li><a href="#consulta2" >Consultar Producto</a></li>
+        <li><a href="#actualizar" >Actualizar Producto</a></li>
+        <li><a href="#eliminar" >Eliminar Producto</a></li>
+      </ul>
+    </div>
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+<div data-role="page" id="registro">
+  <div data-role="header" >
+    <p>Registrar Producto</p>
+  </div>
+  <div data-role="content">
+    <label for="producto">Producto:</label>
+    <input type="text" id="producto">
+    <label for="marca">Marca:</label>
+    <input type="text" id="marca">
+    <label for="modelo">Modelo:</label>
+    <input type="text" id="modelo">
+    <label for="precio">Precio:</label>
+    <input type="text" id="precio">
+    <input type="button" id="guardar" value="Guardar">
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+<div data-role="page" id="consulta">
+  <div data-role="header" >
+    <p>Consultar Producto</p>
+  </div>
+  <div data-role="content">
+    <input type="button" id="consultar" value="Consultar">
+    <div id="resconsulta"></div>
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+<div data-role="page" id="consulta2">
+  <div data-role="header" >
+    <p>Consultar Articulo</p>
+  </div>
+  <div data-role="content">
+    <label for="valConsulta">ID:</label>
+    <input type="text" id="valConsulta" >
+    <input type="button" id="btnconsultar2" value="Consultar">
+    <div id="resconsulta2"></div>
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+<div data-role="page" id="actualizar">
+  <div data-role="header" >
+    <p>Actualizar registros</p>
+  </div>
+  <div data-role="content">
+      <input type="button" id="btnConsAct" value="Mostrar Todos los Registros">
+      <div id="respConAct"> </div>
+      <label for="nomActualizar">ID de Articulo a Actualizar</label>
+      <input type="text" id="nomActualizar">
+      <input type="button" id="btnCarDatos" value="Cargar Datos">
+      <div id="respCargDatos"></div>
+      <input type="button" id="btnGuarDatos" value="Guardar Datos">
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+
+
+
+<div data-role="page" id="eliminar">
+  <div data-role="header" >
+    <p>Eliminar Articulo</p>
+  </div>
+  <div data-role="content">
+      <input type="button" id="btnConsEliminar" value="Mostrar Todos los Registros">
+      <div id="respConElim"> </div>
+      <label for="idEliminar">ID del Producto a Eliminar</label>
+      <input type="text" id="idEliminar">
+      <input type="button" id="btnEliminar" value="Eliminar Registro">
+  </div>
+  <div data-role="footer">
+  <p>Derechos reservados</p>
+  </div>
+</div>
+
+
+
+
+</body>
+</html>
